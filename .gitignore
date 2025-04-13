@@ -1,0 +1,26 @@
+# Ignore build output
+bin/
+obj/
+
+# User-specific files
+*.user
+*.rsuser
+*.suo
+*.userosscache
+*.sln.docstates
+
+# Logs
+*.log
+
+# OS generated files
+.DS_Store
+Thumbs.db
+
+# Visual Studio Code
+.vscode/
+
+# Environment variables
+.env
+
+# Dependency directories
+node_modules/
