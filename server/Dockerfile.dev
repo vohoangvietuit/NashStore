@@ -1,0 +1,24 @@
+# Development Dockerfile with hot reload
+FROM mcr.microsoft.com/dotnet/sdk:9.0
+WORKDIR /app
+
+# Install Entity Framework tools
+RUN dotnet tool install --global dotnet-ef
+ENV PATH="${PATH}:/root/.dotnet/tools"
+
+# Copy project files and restore
+COPY *.sln .
+COPY ["Api/Api.csproj", "Api/"]
+COPY ["Application/Application.csproj", "Application/"]
+COPY ["Domain/Domain.csproj", "Domain/"]
+COPY ["Infrastructure/Infrastructure.csproj", "Infrastructure/"]
+
+RUN dotnet restore
+
+# Copy source code
+COPY . .
+
+EXPOSE 5083
+
+# Run with hot reload
+CMD ["dotnet", "watch", "run", "--project", "Api", "--urls", "http://+:5083"]

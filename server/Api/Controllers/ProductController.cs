@@ -37,10 +37,24 @@ public class ProductsController : ControllerBase
   {
     var (products, totalCount) = await _productService.GetPaginatedProductsAsync(page, pageSize, searchTerm, categoryId);
 
+    // Project to avoid circular reference issues
+    var productResponse = products.Select(p => new
+    {
+      Id = p.Id,
+      Name = p.Name,
+      Price = p.Price,
+      Quantity = p.Quantity,
+      Note = p.Note,
+      CategoryId = p.CategoryId,
+      CategoryName = p.Category?.Name,
+      Image = p.Image,
+      Date = p.Date
+    });
+
     // Return products with pagination information
     return Ok(new
     {
-      Data = products,
+      Data = productResponse,
       TotalRecord = totalCount,
       PageSize = pageSize,
       CurrentPage = page
@@ -175,6 +189,13 @@ public class ProductsController : ControllerBase
     }
 
     var products = await _productService.SearchProductsAsync(search);
+    
+    // Filter by category if provided
+    if (category.HasValue)
+    {
+      products = products.Where(p => p.CategoryId == category.Value).ToList();
+    }
+    
     return Ok(products);
   }
 }

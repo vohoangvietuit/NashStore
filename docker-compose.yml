@@ -1,0 +1,54 @@
+version: '3.8'
+
+services:
+  # PostgreSQL Database
+  postgres:
+    image: postgres:15-alpine
+    container_name: nashstore-postgres
+    environment:
+      POSTGRES_DB: NashStoreDb
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres123
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - nashstore-network
+
+  # .NET API Backend
+  api:
+    build:
+      context: ./server
+      dockerfile: Dockerfile
+    container_name: nashstore-api
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ASPNETCORE_URLS=http://+:5083
+      - ConnectionStrings__DefaultConnection=Host=postgres;Port=5432;Database=NashStoreDb;Username=postgres;Password=postgres123
+    ports:
+      - "5083:5083"
+    depends_on:
+      - postgres
+    networks:
+      - nashstore-network
+
+  # React Frontend
+  client:
+    build:
+      context: ./client
+      dockerfile: Dockerfile
+    container_name: nashstore-client
+    ports:
+      - "3000:3000"
+    depends_on:
+      - api
+    networks:
+      - nashstore-network
+
+networks:
+  nashstore-network:
+    driver: bridge
+
+volumes:
+  postgres_data:
